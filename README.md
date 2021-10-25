@@ -9,7 +9,7 @@ chinese localization project for the GBA game mother1+2 (mohter2 part only)
 ## 进度
 
 ### 中文字体
-　　`chs_font/makefont.py`用于生成字体，运行需要安装python3.8。读取 bdf 字体，并生成mother2所需的字库文件。
+　　`chs_font/makefont.py`用于生成字体，运行需要安装python3.8。读取 bdf 字体，并生成mother2所需的字库文件。目前，使用开源的[最像素字体](https://github.com/SolidZORO/zpix-pixel-font)。
 
 ### 单字节、双字节
 　　中文需要双字节编码，故在英文版基础上做如下修改。
@@ -26,6 +26,7 @@ chinese localization project for the GBA game mother1+2 (mohter2 part only)
 - [1B FF XX XX] 文本停顿一段时间。
 
 　　根据游戏内对话框的大小，大部分对话需要每10个汉字就换行。
+　　`working/m12-strings-MT.txt` 包含了所有日文文本的机翻，以供参考。
 
 ## 如何构建中文rom
 
