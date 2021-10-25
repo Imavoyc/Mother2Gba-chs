@@ -1,0 +1,8 @@
+.org 0x8C04230 :: .incbin "m12-psinames.bin"
+
+.org 0x80C211C :: dw 0x08C04230
+.org 0x80C22F0 :: dw 0x08C04230
+.org 0x80C2398 :: dw 0x08C04230
+.org 0x80C2478 :: dw 0x08C04230
+.org 0x80C2528 :: dw 0x08C04230
+.org 0x80D39D0 :: dw 0x08C04230
