@@ -1,3 +1,5 @@
+import sys
+import os
 
 bdf_file = open('zpix.bdf',"r",encoding = "utf-8")
 bdf_lines = bdf_file.readlines()
@@ -86,8 +88,7 @@ def draw_font_char(code):
         line = line.replace('0',' ')
         line = line.replace('1','*')
         print(line)
-    
-    
+
 def make_font_region(r):
     assert(r >= 0xa1 and r <= 0xF7)
     bitmap_bytes = bytearray()
@@ -108,13 +109,37 @@ def make_font_region(r):
     f.write(bitmap_bytes)
     f.close()
 
-for r in range(0xb0,0xE8):
-    make_font_region(r)
+def make_font_special(r,spcs):
+    assert(len(spcs) < 128)
+    bitmap_bytes = bytearray()
     
-print('m2_chs_font_table:')
-for r in range(0xb0,0xE8):
-    print('dw      m2_chs_font_%02x'% r)
+    for spc in spcs:
+        unicode =  int.from_bytes(spc.encode('utf-16-le'),'little')
+        char_bytes = make_font_char(unicode)
+        bitmap_bytes = bitmap_bytes + char_bytes
+
+    filename = 'm2_chs_font_%02x.bin' % r
+    f = open(filename,'wb')
+    f.write(bitmap_bytes)
+    f.close()
+
+if sys.argv[1] == 'n':
+    for r in range(0xb0,0xE8):
+        make_font_region(r)
+        
+    print('m2_chs_font_table:')
+    for r in range(0xb0,0xE8):
+        print('dw      m2_chs_font_%02x'% r)
+        
+    for r in range(0xb0,0xE8):
+        print('m2_chs_font_%02x:'% r)
+        print('.incbin "data/m2_chs_font_%02x.bin"'% r)
+
+if sys.argv[1] == 's':
+    spc_file = open('special_char.txt',"r",encoding = "gbk")
+    spc_lines = spc_file.readlines()
+    spc_file.close()
     
-for r in range(0xb0,0xE8):
-    print('m2_chs_font_%02x:'% r)
-    print('.incbin "data/m2_chs_font_%02x.bin"'% r)
+    region = 0xaa
+    for line in spc_lines:
+        make_font_special(region,line)

@@ -2,6 +2,18 @@ dofile("m12-codelist.lua")
 
 local baseAddress = 0xC10000
 
+local special_chars = {}
+local special_char_idx = {}
+
+local function is_include(value, tab)
+    for k,v in ipairs(tab) do
+      if v == value then
+          return true
+      end
+    end
+    return false
+end
+
 local function split(s, p)
     local rt= {}
     string.gsub(s, '[^'..p..']+', function(w) table.insert(rt, w) end )
@@ -136,13 +148,36 @@ local function scan_string(text)
             i = p + 1
         else 
             if string.sub(text,i,i) ~= '\n' and string.sub(text,i,i) ~= '\r' then
-                referenceAddress = referenceAddress + 1
+                local b = string.byte(text,i)
+                
+                if b < 0xa1 then
+                    b = b + 0x30
+                    referenceAddress = referenceAddress + 1
+                else
+                    local b2 = string.byte(text,i+1)
+                    --print(string.format("%2x %2x",b,b2))
+
+                    if b > 0xe7 or b < 0xb0 then
+                        local spc = string.pack('<I1I1',b,b2)
+                        if not is_include(spc,special_chars) then
+                            table.insert(special_chars,spc)
+                        end
+                    end
+                    referenceAddress = referenceAddress + 2
+                    i = i + 1
+                end
             end
         
             i = i+1
         end
     end
-    
+
+    local special_char_file = io.open('./chs_font/special_char.txt', "w")
+    for k,v in ipairs(special_chars) do
+        special_char_file:write(v)
+        special_char_idx[v] = k + 0xAAA0
+    end
+    special_char_file:close()
     return AddressMap
 end
 
@@ -204,10 +239,25 @@ local function compile_string(text,AddressMap)
                 else
                     local b2 = string.byte(text,i+1)
                     --print(string.format("%2x %2x",b,b2))
-                    b = b - 0xA1
                     
-                    buffer = buffer .. string.pack('<I1',b)
-                    buffer = buffer .. string.pack('<I1',b2)
+                    if b > 0xe7 or b < 0xb0 then
+                        local spc = string.pack('<I1I1',b,b2)
+                        local spc_code = special_char_idx[spc]
+                        assert(spc_code)
+                        --print(string.format("%s spcode %x",spc,spc_code))
+                        b = spc_code >> 8
+                        b2 = spc_code & 0xff
+                        b = b - 0xA1
+                        
+                        buffer = buffer .. string.pack('<I1',b)
+                        buffer = buffer .. string.pack('<I1',b2)
+                    else
+                        b = b - 0xA1
+                        
+                        buffer = buffer .. string.pack('<I1',b)
+                        buffer = buffer .. string.pack('<I1',b2)
+                    end
+                    
                     referenceAddress = referenceAddress + 2
                     i = i + 1
                 end

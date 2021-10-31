@@ -2051,7 +2051,8 @@ dw      0
 dw      0
 dw      0
 dw      0
-dw      0
+
+dw      m2_chs_font_aa
 dw      0
 dw      0
 dw      0
@@ -2114,6 +2115,9 @@ dw      m2_chs_font_e4
 dw      m2_chs_font_e5
 dw      m2_chs_font_e6
 dw      m2_chs_font_e7
+
+m2_chs_font_aa:
+.incbin "data/m2_chs_font_aa.bin"
 m2_chs_font_b0:
 .incbin "data/m2_chs_font_b0.bin"
 m2_chs_font_b1:
